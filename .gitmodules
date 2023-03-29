@@ -1,0 +1,6 @@
+[submodule "cbuild"]
+	path = cbuild
+	url = https://github.com/Timerix22/cbuild.git
+[submodule "kerep"]
+	path = kerep
+	url = https://github.com/Timerix22/kerep.git
