@@ -1,17 +1,24 @@
 #!/bin/bash
 
-# check if kerep static lib exists or kerep_rebuild task was executed
-if [ ! -f "$OBJDIR/libs/kerep.a" ] || [ -f .rebuild_kerep.tmp ]; then
-    [[ -z "$KEREP_BUILD_TASK" ]] && error "KEREP_BUILD_TASK is empty" 
-    myprint "${BLUE}making kerep task <$KEREP_BUILD_TASK>"
+# if $lib_project.a doesn't exist or rebuild_* task was executed, builds static lib
+function handle_static_dependency {
+    local lib_project="$1"
+    local lib_build_task="$2"
+    if [ ! -f "$OBJDIR/libs/$lib_project.a" ] || [ -f .rebuild_$lib_project.tmp ]; then
+        [[ -z "$lib_build_task" ]] && error "lib_build_task is empty" 
+        myprint "${BLUE}making $lib_project task <$lib_build_task>"
 
-    cd kerep
-    if ! make "$KEREP_BUILD_TASK"; then
-        exit 1
+        cd $lib_project
+        if ! make "$lib_build_task"; then
+            exit 1
+        fi
+        cd ..
+
+        cp $lib_project/bin/$lib_project.a $OBJDIR/libs/
+        myprint "${GREEN}copied ${CYAN}$lib_project.a"
+        rm -f .rebuild_$lib_project.tmp
     fi
-    cd ..
+}
 
-    cp kerep/bin/kerep.a $OBJDIR/libs/
-    myprint "${GREEN}copied ${CYAN}kerep.a"
-    rm -f .rebuild_kerep.tmp
-fi
+handle_static_dependency kerep $KEREP_BUILD_TASK
+handle_static_dependency imgui $KEREP_BUILD_TASK

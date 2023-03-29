@@ -1,4 +1,5 @@
 #include "../kerep/src/base/base.h"
+#include "gui/gui.h"
 
 void kt_initGraphCTypes(){
 
@@ -17,6 +18,10 @@ int main(const int argc, const char* const* argv){
     for(i32 i=0; i<argc; i++)
         kprintf(" %s", argv[i]);
     kprintf("\n");
+
+    tryLast(main_window_open(),_1);
+    tryLast(main_window_loop_start(),_2);
+    tryLast(main_window_close(),_3);
 
     kt_free();
     return 0;

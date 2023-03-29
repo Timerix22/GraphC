@@ -4,3 +4,11 @@
 [submodule "kerep"]
 	path = kerep
 	url = https://github.com/Timerix22/kerep.git
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/Timerix22/imgui.git
+    branch = master_cbuild
+[submodule "SDL2"]
+	path = SDL2
+	url = https://github.com/Timerix22/SDL.git
+	branch = SDL2
