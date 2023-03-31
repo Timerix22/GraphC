@@ -19,7 +19,7 @@ int main(const int argc, const char* const* argv){
         kprintf(" %s", argv[i]);
     kprintf("\n");
 
-    tryLast(main_window_open(),_1);
+    tryLast(main_window_open("GraphC"),_1);
     tryLast(main_window_loop_start(),_2);
     tryLast(main_window_close(),_3);
 

@@ -6,7 +6,7 @@ extern "C" {
 
 #include "../../kerep/src/base/base.h"
 
-Maybe main_window_open();
+Maybe main_window_open(const char* window_title);
 Maybe main_window_loop_start();
 Maybe main_window_close();
 
