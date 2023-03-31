@@ -7,7 +7,7 @@ SDL_GLContext gl_context;
 
 #define SDL_ERROR_SAFETHROW() { \
     const char* sdl_error=SDL_GetError(); \
-    throw_msg(cptr_concat("SDL Error: ", sdl_error)); \
+    safethrow_msg(cptr_concat("SDL Error: ", sdl_error),;); \
     SDL_ClearError(); \
 }
 #define SDL_TRY_ZERO(FUNC_CALL) if(FUNC_CALL != 0) SDL_ERROR_SAFETHROW();
@@ -42,10 +42,22 @@ Maybe main_window_open(){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls   
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
+    io.ConfigViewportsNoDecoration=false;
     
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
+    
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
     if(ImGui_ImplSDL2_InitForOpenGL(sdl_window, gl_context) != true)
@@ -64,7 +76,7 @@ Maybe main_window_loop_start(){
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = RGBAHexToF(35,35,50,255);
 
     // main loop
     while(loop_running){
@@ -77,10 +89,12 @@ Maybe main_window_loop_start(){
         while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                loop_running = false;
-            if (event.type==SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(sdl_window))
-                loop_running = false;
+            if (event.type == SDL_QUIT){
+                try_cpp(main_window_close(),_9914,;);
+            }
+            if (event.type==SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(sdl_window)){
+                try_cpp(main_window_close(),_9915,;);
+            }
         }
 
         // Start the Dear ImGui frame
@@ -133,18 +147,22 @@ Maybe main_window_loop_start(){
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+            SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+        }
+
         SDL_GL_SwapWindow(sdl_window);
     }
 
-    try_cpp(main_window_close(),_999,;);
-    return MaybeNull;
-}
-
-Maybe main_window_close(){
-    if(!loop_running)
-        return MaybeNull;
-    loop_running=false;
-    
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -153,5 +171,13 @@ Maybe main_window_close(){
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
 
+    return MaybeNull;
+}
+
+Maybe main_window_close(){
+    if(!loop_running)
+        return MaybeNull;
+    loop_running=false;
+    
     return MaybeNull;
 }
