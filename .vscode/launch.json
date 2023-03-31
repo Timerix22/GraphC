@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gdb_debug_unix",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/GraphC",
+            "preLaunchTask": "build_exec_dbg",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        // the only difference is .exe
+        {
+            "name": "gdb_debug_win",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/GraphC.exe",
+            "preLaunchTask": "build_exec_dbg",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
