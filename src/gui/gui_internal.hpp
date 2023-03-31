@@ -12,4 +12,5 @@ extern ImVec4 clear_color; // background color for main window
 
 /// @brief frees all allocated resources
 void main_window_destroy();
-Maybe demo_ui_draw(ImGuiIO&);
+void draw_demo_windows(ImGuiIO&);
+void draw_bg_window();

@@ -46,10 +46,10 @@ Maybe main_window_open(const char* window_title){
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls   
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
     io.ConfigDockingTransparentPayload = true;
     io.ConfigInputTextCursorBlink = false;
-    io.ConfigViewportsNoTaskBarIcon = true;
+    // io.ConfigViewportsNoTaskBarIcon = true;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // Setup Dear ImGui style
@@ -113,7 +113,8 @@ Maybe draw_frame(){
     ImGuiIO& io = ImGui::GetIO();
 
     // Draw UI
-    try_cpp(demo_ui_draw(io), _5218, ;);
+    draw_bg_window();
+    draw_demo_windows(io);
 
     // Rendering
     ImGui::Render();
