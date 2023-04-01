@@ -15,3 +15,4 @@ libs/
 # user files
 .old*/
 current.config
+src/generated/

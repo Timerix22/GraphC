@@ -1,17 +1,22 @@
 #include "gui_internal.hpp"
 
+#define default_font_name DroidSans
+const f32 default_font_size=14.0f;
 ImVec4 clear_color = RGBAHexToF(35,35,50,255);
 bool loop_running=false;
 SDL_Window* sdl_window;
 SDL_GLContext gl_context;
 
-#define SDL_ERROR_SAFETHROW() { \
-    const char* sdl_error=SDL_GetError(); \
-    safethrow_msg(cptr_concat("SDL Error: ", sdl_error),;); \
-    SDL_ClearError(); \
+f32 getMainWindowDPI(){
+    int w=0, h=0;
+    SDL_GL_GetDrawableSize(sdl_window, &w, &h);
+    int sim_w=0, sim_h=0;
+    SDL_GetWindowSize(sdl_window, &sim_w, &sim_h);
+    f32 wdpi=w/sim_w;
+    f32 hdpi=h/sim_h;
+    f32 dpi=SDL_sqrtf(wdpi*wdpi + hdpi*hdpi);
+    return dpi;
 }
-#define SDL_TRY_ZERO(FUNC_CALL) if(FUNC_CALL != 0) SDL_ERROR_SAFETHROW();
-#define SDL_TRY_ONE(FUNC_CALL) if(FUNC_CALL != 1) SDL_ERROR_SAFETHROW();
 
 Maybe main_window_open(const char* window_title){
     SDL_TRY_ZERO(SDL_Init(SDL_INIT_VIDEO));
@@ -31,7 +36,10 @@ Maybe main_window_open(const char* window_title){
     SDL_TRY_ZERO( SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1));
     SDL_TRY_ZERO( SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
     SDL_TRY_ZERO( SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8));
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE|SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(
+        SDL_WINDOW_OPENGL |
+        SDL_WINDOW_RESIZABLE |
+        SDL_WINDOW_ALLOW_HIGHDPI);
     sdl_window = SDL_CreateWindow(window_title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         1280, 720, window_flags);
@@ -52,23 +60,17 @@ Maybe main_window_open(const char* window_title){
     // io.ConfigViewportsNoTaskBarIcon = true;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
     // Setup Platform/Renderer backends
     if(ImGui_ImplSDL2_InitForOpenGL(sdl_window, gl_context) != true)
         SDL_ERROR_SAFETHROW();
     if(ImGui_ImplOpenGL3_Init(glsl_version) != true)
         SDL_ERROR_SAFETHROW();
 
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
+
+    node_editor_open("node editor");
     return MaybeNull;
 }
 
@@ -115,6 +117,7 @@ Maybe draw_frame(){
     // Draw UI
     draw_bg_window();
     draw_demo_windows(io);
+    node_editor_draw();
 
     // Rendering
     ImGui::Render();
@@ -177,6 +180,7 @@ Maybe main_window_close(){
 }
 
 void main_window_destroy(){
+    node_editor_close();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

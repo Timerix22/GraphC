@@ -22,6 +22,7 @@ function handle_static_dependency {
 
 handle_static_dependency kerep $KEREP_BUILD_TASK
 handle_static_dependency imgui $KEREP_BUILD_TASK
+handle_static_dependency imgui-node-editor $KEREP_BUILD_TASK
 
 # copy all precompiled libs
 cp libs/* $OBJDIR/libs/
