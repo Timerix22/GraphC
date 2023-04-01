@@ -20,6 +20,12 @@ function handle_static_dependency {
     fi
 }
 
+if [ ! -f libs/fonts_embedded.a ]; then
+    if ! make embed_fonts; then
+        exit 1
+    fi
+fi
+
 handle_static_dependency kerep $KEREP_BUILD_TASK
 handle_static_dependency imgui $KEREP_BUILD_TASK
 handle_static_dependency imgui-node-editor $KEREP_BUILD_TASK
