@@ -1,6 +1,6 @@
 #include "gui_internal.hpp"
 
-#define default_font_name DroidSans
+#define default_font_name font_DroidSans
 const f32 default_font_size=14.0f;
 ImVec4 clear_color = RGBAHexToF(35,35,50,255);
 bool loop_running=false;
@@ -69,6 +69,8 @@ Maybe main_window_open(const char* window_title){
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
+    kprintf("%s\n",ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size)->GetDebugName());
+    io.Fonts->Build();
 
     node_editor_open("node editor");
     return MaybeNull;

@@ -14,16 +14,18 @@
 #include "../generated/fonts_embedded.h"
 
 #define __CAT3(A,B,C) A##B##C
-#define embedded_font_data(FONT_NAME) __CAT3(font_,FONT_NAME,_compressed_data)
-#define embedded_font_size(FONT_NAME) __CAT3(font_,FONT_NAME,_compressed_size)
+#define embedded_font_data(FONT) __CAT3(font_,FONT,_compressed_data)
+#define embedded_font_size(FONT) __CAT3(font_,FONT,_compressed_size)
+#define embedded_font_name(FONT) #FONT
 
 f32 getMainWindowDPI();
 ImFont* ImFont_LoadFromFile(const char* file_path, f32 font_size);
-ImFont* _ImFont_LoadEmbedded(const void* data, int data_size, f32 font_size);
+ImFont* _ImFont_LoadEmbedded(const void* data, int data_size, const char* font_name, f32 font_size);
 
-#define ImFont_LoadEmbedded(FONT_NAME, FONT_SIZE) _ImFont_LoadEmbedded( \
-    embedded_font_data(FONT_NAME), \
-    embedded_font_size(FONT_NAME), \
+#define ImFont_LoadEmbedded(FONT, FONT_SIZE) _ImFont_LoadEmbedded( \
+    embedded_font_data(FONT), \
+    embedded_font_size(FONT), \
+    embedded_font_name(FONT), \
     FONT_SIZE)
 
 //////////////////////////////////////
