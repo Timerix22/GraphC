@@ -5,11 +5,15 @@ namespace NE = ax::NodeEditor;
 NE::EditorContext* editor_context=nullptr;
 const char* editor_title;
 
+void draw_example_node();
+
+
 void node_editor_open(const char* title){
     NE::Config config;
     config.SettingsFile = "node_editor.json";
     editor_context=NE::CreateEditor(&config);
     editor_title=title;
+    NE::Style& style=NE::GetStyle();
 }
 
 void node_editor_close(){
@@ -17,27 +21,40 @@ void node_editor_close(){
     editor_context=nullptr;
 }
 
-void node_editor_draw(){
+u32 node_id_next;
+u32 pin_id_next;
+u32 link_id_next;
+
+void draw_node_editor(){
     if(editor_context==nullptr)
         return;
 
+    node_id_next=0;
+    pin_id_next=0;
+    link_id_next=0;
     ImGui::Begin(editor_title);
-    NE::SetCurrentEditor(editor_context);
-    NE::Begin(editor_title, ImVec2(0.0, 0.0f));
-    int uniqueId = 1;
-    // Start drawing nodes.
-    NE::BeginNode(uniqueId++);
-        ImGui::Text("Node A");
-        NE::BeginPin(uniqueId++, NE::PinKind::Input);
-            ImGui::Text("-> In");
-        NE::EndPin();
-        ImGui::SameLine();
-        NE::BeginPin(uniqueId++, NE::PinKind::Output);
-            ImGui::Text("Out ->");
-        NE::EndPin();
-    NE::EndNode();
-    NE::End();
-    NE::SetCurrentEditor(nullptr);
+        ImGui::SetWindowSizeMin(300,300);
+        NE::SetCurrentEditor(editor_context);
+        NE::Begin(editor_title);
+            // Start drawing nodes.
+            draw_example_node();
+            ImVec2 node_pos=NE::GetNodePosition(node_id_next-1);
+            NE::SetNodePosition(node_id_next, ImVec2Add(node_pos, ImVec2(50, 20)));
+            draw_example_node();
+        NE::End();
+        NE::SetCurrentEditor(nullptr);
     ImGui::End();
 }
 
+void draw_example_node(){
+    NE::BeginNode(node_id_next++);
+        ImGui::Text("Node A");
+        NE::BeginPin(pin_id_next++, NE::PinKind::Input);
+            ImGui::Text("-> In");
+        NE::EndPin();
+        ImGui::SameLine();
+        NE::BeginPin(pin_id_next++, NE::PinKind::Output);
+            ImGui::Text("Out ->");
+        NE::EndPin();
+    NE::EndNode();
+}

@@ -31,6 +31,7 @@ ImFont* _ImFont_LoadEmbedded(const void* data, int data_size, const char* font_n
 //////////////////////////////////////
 //     Variables and constants      //
 //////////////////////////////////////
+const u8 frame_rate_min=30; // frames per second
 const u8 frame_rate_max=60; // frames per second
 extern ImVec4 clear_color; // background color for main window
 
@@ -39,11 +40,11 @@ extern ImVec4 clear_color; // background color for main window
 //////////////////////////////////////
 /// @brief frees all allocated resources
 void main_window_destroy();
-void draw_demo_windows(ImGuiIO&);
+void draw_debug_window(ImGuiIO& io, bool* main_loop_wait_for_input);
 void draw_bg_window();
 
 void node_editor_open(const char* title);
-void node_editor_draw();
+void draw_node_editor();
 void node_editor_close();
 
 //////////////////////////////////////
@@ -56,3 +57,13 @@ void node_editor_close();
 }
 #define SDL_TRY_ZERO(FUNC_CALL) if(FUNC_CALL != 0) SDL_ERROR_SAFETHROW();
 #define SDL_TRY_ONE(FUNC_CALL) if(FUNC_CALL != 1) SDL_ERROR_SAFETHROW();
+
+
+//////////////////////////////////////
+//        ImGui extensions          //
+//////////////////////////////////////
+namespace ImGui {
+    void SetWindowSizeMin(f32 window_width_min, f32 window_height_min);
+}
+
+ImVec2 ImVec2Add(ImVec2 a, ImVec2 b);

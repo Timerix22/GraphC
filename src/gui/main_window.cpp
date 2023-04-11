@@ -6,6 +6,7 @@ ImVec4 clear_color = RGBAHexToF(35,35,50,255);
 bool loop_running=false;
 SDL_Window* sdl_window;
 SDL_GLContext gl_context;
+bool main_loop_wait_for_input=true;
 
 f32 getMainWindowDPI(){
     int w=0, h=0;
@@ -50,7 +51,7 @@ Maybe main_window_open(const char* window_title){
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls   
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
@@ -69,19 +70,14 @@ Maybe main_window_open(const char* window_title){
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
-    kprintf("%s\n",ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size)->GetDebugName());
-    io.Fonts->Build();
+    ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size);
 
     node_editor_open("node editor");
     return MaybeNull;
 }
 
 // Wait, poll and handle events (inputs, window resize, etc.)
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-Maybe poll_events(bool& frame_needs_update, bool wait){
+Maybe poll_events(u16& frame_updates_requested, bool wait){
     SDL_Event event;
     if(wait){
         // waits for first event in cpu-efficient way
@@ -92,7 +88,8 @@ Maybe poll_events(bool& frame_needs_update, bool wait){
         return MaybeNull;
     
     do {
-        frame_needs_update|=ImGui_ImplSDL2_ProcessEvent(&event);
+        if(ImGui_ImplSDL2_ProcessEvent(&event))
+            frame_updates_requested=2;
         switch(event.type){
             case SDL_QUIT: {
                 try_cpp(main_window_close(),_9914,;);
@@ -118,8 +115,8 @@ Maybe draw_frame(){
 
     // Draw UI
     draw_bg_window();
-    draw_demo_windows(io);
-    node_editor_draw();
+    draw_debug_window(io, &main_loop_wait_for_input);
+    draw_node_editor();
 
     // Rendering
     ImGui::Render();
@@ -152,21 +149,36 @@ Maybe main_window_loop_start(){
     // draw first frame
     try_cpp(draw_frame(),_2175,;);
 
-    // main loop
+    u16 frame_updates_requested=1;
+    u64 prev_update_time_ms=SDL_GetTicks64();
     loop_running=true;
+    // main loop
     while(loop_running){
-        bool frame_needs_update=false;
         // waits for events
-        try_cpp(poll_events(frame_needs_update, true),_55415,;);
+        try_cpp(poll_events(frame_updates_requested, main_loop_wait_for_input),_55415,;);
 
-        if(!frame_needs_update){
-            // skips frame rendering if user didn't interacted with anything
-            u32 frame_delay_ms=1000/frame_rate_max;
-            SDL_Delay(frame_delay_ms);
-            continue;
+        if(frame_updates_requested==0)
+        {
+            u64 update_time_ms=SDL_GetTicks64();
+            if(update_time_ms >= prev_update_time_ms + 1000/frame_rate_min){
+                // if frame rate < frame_rate_min then requests frame draw
+                // works only if main_loop_wait_for_input = false
+                frame_updates_requested=1;
+                prev_update_time_ms=update_time_ms;
+            }
+            else {
+                // skips frame rendering and waits to limit fps
+                u32 frame_delay_ms=1000/frame_rate_max;
+                SDL_Delay(frame_delay_ms);
+                continue;
+            }
         }
-        
-        try_cpp(draw_frame(),_2175,;);
+
+        // deaws requested number of frames
+        while(frame_updates_requested>0) {
+            try_cpp(draw_frame(),_2175,;);
+            frame_updates_requested--;
+        }   
     }
 
     // Cleanup
