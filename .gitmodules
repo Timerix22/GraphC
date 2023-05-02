@@ -16,3 +16,7 @@
 	path = imgui-node-editor
 	url = https://github.com/Timerix22/imgui-node-editor.git
     branch = develop_cbuild
+[submodule "imnodes"]
+	path = imnodes
+	url = https://github.com/Timerix22/imnodes
+    branch = master_cbuild

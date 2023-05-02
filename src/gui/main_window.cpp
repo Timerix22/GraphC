@@ -72,7 +72,7 @@ Maybe main_window_open(const char* window_title){
     io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
     ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size);
 
-    node_editor_open("node editor");
+    node_editor_create("node editor");
     return MaybeNull;
 }
 
@@ -194,7 +194,7 @@ Maybe main_window_close(){
 }
 
 void main_window_destroy(){
-    node_editor_close();
+    node_editor_destroy();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

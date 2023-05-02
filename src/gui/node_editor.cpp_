@@ -1,0 +1,117 @@
+#include "gui_internal.hpp"
+#include "../../imgui-node-editor/imgui_node_editor.h"
+namespace NE = ax::NodeEditor;
+
+NE::EditorContext* editor_context=nullptr;
+const char* editor_title;
+
+void draw_example_node(const char* title);
+
+
+void node_editor_create(const char* title){
+    NE::Config config;
+    config.SettingsFile = "node_editor.json";
+    editor_context=NE::CreateEditor(&config);
+    editor_title=title;
+    //NE::Style& style=NE::GetStyle();
+}
+
+void node_editor_destroy(){
+    NE::DestroyEditor(editor_context);
+    editor_context=nullptr;
+}
+
+u32 node_id_next;
+u32 pin_id_next;
+u32 link_id_next;
+
+void draw_node_editor(){
+    if(editor_context==nullptr)
+        return;
+
+    node_id_next=0;
+    pin_id_next=0;
+    link_id_next=0;
+    ImGui::Begin(editor_title);
+        ImGui::SetWindowSizeMin(300,300);
+        NE::SetCurrentEditor(editor_context);
+        NE::Begin(editor_title);
+            // Start drawing nodes.
+            draw_example_node("node A");
+            // ImVec2 node_pos=NE::GetNodePosition(node_id_next-1);
+            // NE::SetNodePosition(node_id_next, ImVec2Add(node_pos, ImVec2(50, 20)));
+            draw_example_node("node B");
+
+            
+            // Handle creation action, returns true if editor want to create new object (node or link)
+            if (NE::BeginCreate())
+            {
+                NE::PinId inputPinId, outputPinId;
+                if (NE::QueryNewLink(&inputPinId, &outputPinId))
+                {
+                    // QueryNewLink returns true if editor want to create new link between pins.
+                    //
+                    // Link can be created only for two valid pins, it is up to you to
+                    // validate if connection make sense. Editor is happy to make any.
+                    //
+                    // Link always goes from input to output. User may choose to drag
+                    // link from output pin or input pin. This determine which pin ids
+                    // are valid and which are not:
+                    //   * input valid, output invalid - user started to drag new ling from input pin
+                    //   * input invalid, output valid - user started to drag new ling from output pin
+                    //   * input valid, output valid   - user dragged link over other pin, can be validated
+
+                    if (inputPinId && outputPinId) // both are valid, let's accept link
+                    {
+                        // NE::AcceptNewItem() return true when user release mouse button.
+                        if (NE::AcceptNewItem())
+                        {
+                            // Draw new link.
+                            NE::Link(link_id_next++, inputPinId, outputPinId);
+                        }
+
+                        // You may choose to reject connection between these nodes
+                        // by calling NE::RejectNewItem(). This will allow editor to give
+                        // visual feedback by changing link thickness and color.
+                    }
+                }
+            }
+            NE::EndCreate(); // Wraps up object creation action handling.
+
+
+            // Handle deletion action
+            if (NE::BeginDelete())
+            {
+                // There may be many links marked for deletion, let's loop over them.
+                NE::LinkId deletedLinkId;
+                while (NE::QueryDeletedLink(&deletedLinkId))
+                {
+                    // If you agree that link can be deleted, accept deletion.
+                    if (NE::AcceptDeletedItem())
+                    {
+                    }
+
+                    // You may reject link deletion by calling:
+                    // NE::RejectDeletedItem();
+                }
+            }
+            NE::EndDelete(); // Wrap up deletion action
+
+
+        NE::End();
+        NE::SetCurrentEditor(nullptr);
+    ImGui::End();
+}
+
+void draw_example_node(const char* title){
+    NE::BeginNode(node_id_next++);
+        ImGui::Text(title);
+        NE::BeginPin(pin_id_next++, NE::PinKind::Input);
+            ImGui::Text("-> In");
+        NE::EndPin();
+        ImGui::SameLine();
+        NE::BeginPin(pin_id_next++, NE::PinKind::Output);
+            ImGui::Text("Out ->");
+        NE::EndPin();
+    NE::EndNode();
+}

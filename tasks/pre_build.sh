@@ -26,9 +26,10 @@ if [ ! -f libs/fonts_embedded.a ]; then
     fi
 fi
 
-handle_static_dependency kerep $KEREP_BUILD_TASK
-handle_static_dependency imgui $KEREP_BUILD_TASK
-handle_static_dependency imgui-node-editor $KEREP_BUILD_TASK
+handle_static_dependency kerep $DEPS_BUILD_TASK
+handle_static_dependency imgui $DEPS_BUILD_TASK
+handle_static_dependency imgui-node-editor $DEPS_BUILD_TASK
+handle_static_dependency imnodes $DEPS_BUILD_TASK
 
 # copy all precompiled libs
 cp libs/* $OBJDIR/libs/
