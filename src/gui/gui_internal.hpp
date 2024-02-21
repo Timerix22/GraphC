@@ -43,10 +43,6 @@ void main_window_destroy();
 void draw_debug_window(ImGuiIO& io, bool* main_loop_wait_for_input);
 void draw_bg_window();
 
-void node_editor_create(const char* title);
-void draw_node_editor();
-void node_editor_destroy();
-
 //////////////////////////////////////
 //             Macros               //
 //////////////////////////////////////

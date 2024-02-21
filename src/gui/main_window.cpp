@@ -1,4 +1,6 @@
 #include "gui_internal.hpp"
+#include "NodeEditor.hpp"
+using namespace GraphC::gui;
 
 #define default_font_name font_DroidSans
 const f32 default_font_size=14.0f;
@@ -7,6 +9,7 @@ bool loop_running=false;
 SDL_Window* sdl_window;
 SDL_GLContext gl_context;
 bool main_loop_wait_for_input=true;
+NodeEditor node_editor("new editor");
 
 f32 getMainWindowDPI(){
     int w=0, h=0;
@@ -75,7 +78,10 @@ Maybe main_window_open(const char* window_title){
     io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
     ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size);
 
-    node_editor_create("node editor");
+    ImNodes::CreateContext();
+    ImNodes::StyleColorsDark();
+    ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+    node_editor=NodeEditor("node editor");
     return MaybeNull;
 }
 
@@ -119,7 +125,8 @@ Maybe draw_frame(){
     // Draw UI
     draw_bg_window();
     draw_debug_window(io, &main_loop_wait_for_input);
-    draw_node_editor();
+    node_editor.show();
+    node_editor.draw();
 
     // Rendering
     ImGui::Render();
@@ -197,7 +204,7 @@ Maybe main_window_close(){
 }
 
 void main_window_destroy(){
-    node_editor_destroy();
+    ImNodes::DestroyContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

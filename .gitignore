@@ -16,3 +16,4 @@ libs/
 .old*/
 current.config
 src/generated/
+imgui.ini
