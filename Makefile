@@ -24,9 +24,6 @@ rebuild_kerep:
 rebuild_imgui: 
 	@cbuild/rebuild_dep.sh libimgui.a 2>&1 | tee make_raw.log
 
-rebuild_imgui_node_editor:
-	@cbuild/rebuild_dep.sh libimgui-node-editor.a 2>&1 | tee make_raw.log
-
 rebuild_imnodes:
 	@cbuild/rebuild_dep.sh libimnodes.a 2>&1 | tee make_raw.log
 
@@ -35,7 +32,7 @@ rebuild_imnodes:
 embed_fonts:
 	@cbuild/call_task.sh embed_fonts
 
-rebuild_all: rebuild_kerep rebuild_imgui rebuild_imgui_node_editor rebuild_imnodes embed_fonts
+rebuild_all: rebuild_kerep rebuild_imgui rebuild_imnodes embed_fonts
 
 ######################################
 ######       Launch tasks      #######
