@@ -8,17 +8,23 @@ GUI is based on [Dear ImGui](https://github.com/ocornut/imgui) and [SDL](https:/
 ```shell
 git clone --recurse-submodules https://github.com/Timerix22/GraphC
 ```
-2. Install **SDL2** from package manager or compile it from source
-```shell
-cd SDL2
-./configute
-make -j [number of cpu cores]
-make install
-# on windows
-mkdir ../libs
-cp ./build/.libs/*.dll ../libs/
-```
-If it didn't work, read [SDL docs](SDL2/docs/README.md) and [INSTALL.txt](SDL2/INSTALL.txt)).  
+2. Install **SDL2** from package manager or compile it from source.  
+    **If you are using msys, switch to mingw64 shell.**
+    ```shell
+    cd dependencies/SDL2
+    ./configure
+    make -j [number of cpu threads]
+    ```
+    Then you can install it systemwide: 
+    ```shell
+    make install
+    ```
+    or copy to ./libs: 
+    ```shell
+    mkdir -p ../../libs
+    cp ./build/.libs/SDL2.dll ../../libs/
+    ```
+    If it didn't work, read [SDL docs](dependencies/SDL2/docs/README.md) and [INSTALL.txt](dependencies/SDL2/INSTALL.txt).  
 
 3. Compile the program
 ```shell

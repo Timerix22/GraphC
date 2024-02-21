@@ -21,6 +21,9 @@ f32 getMainWindowDPI(){
 
 Maybe main_window_open(const char* window_title){
     SDL_TRY_ZERO(SDL_Init(SDL_INIT_VIDEO));
+    SDL_version v;
+    SDL_GetVersion(&v);
+    kprintf("SDL version: %u.%u.%u\n", v.major, v.minor, v.patch);
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     SDL_TRY_ZERO( SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0));

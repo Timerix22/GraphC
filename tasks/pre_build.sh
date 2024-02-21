@@ -7,5 +7,14 @@ if [ ! -f libs/fonts_embedded.a ]; then
     fi
 fi
 
-# copy all precompiled libs
-cp libs/* $OBJDIR/libs/
+set -x
+# copy precompiled static libs to objects
+cp libs/*.a "$OBJDIR/libs/"
+
+# copy precompiled shared libs to outdir
+if [ $OS == 'WINDOWS' ]; then
+    cp libs/*.dll "$OUTDIR"
+else
+    cp libs/*.so "$OUTDIR"
+fi
+set +x
