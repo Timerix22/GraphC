@@ -13,7 +13,7 @@
 	url = https://github.com/Timerix22/imgui.git
     branch = docking_cbuild
 [submodule "imgui-node-editor"]
-	path = dependencies/imgui-node-editor
+	path = dependencies/imgui_node_editor
 	url = https://github.com/Timerix22/imgui-node-editor.git
     branch = develop_cbuild
 [submodule "imnodes"]

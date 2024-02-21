@@ -13,6 +13,31 @@ build_exec_dbg:
 	@cbuild/call_task.sh build_exec_dbg 2>&1 | tee make_raw.log
 
 ######################################
+######   Rebuild dependencies  #######
+######################################
+
+# recompile kerep.a in the next build task
+rebuild_kerep: 
+	@cbuild/rebuild_dep.sh libkerep.a 2>&1 | tee make_raw.log
+
+# recompile imgui.a in the next build task
+rebuild_imgui: 
+	@cbuild/rebuild_dep.sh libimgui.a 2>&1 | tee make_raw.log
+
+rebuild_imgui_node_editor:
+	@cbuild/rebuild_dep.sh libimgui-node-editor.a 2>&1 | tee make_raw.log
+
+rebuild_imnodes:
+	@cbuild/rebuild_dep.sh libimnodes.a 2>&1 | tee make_raw.log
+
+# writes ttf fonts fron ./fonts/ to C compressed arrays in C source files
+# builds static library from font arrays definitions
+embed_fonts:
+	@cbuild/call_task.sh embed_fonts
+
+rebuild_all: rebuild_kerep rebuild_imgui rebuild_imgui_node_editor rebuild_imnodes embed_fonts
+
+######################################
 ######       Launch tasks      #######
 ######################################
 
@@ -33,10 +58,18 @@ profile:
 	@cbuild/call_task.sh profile 2>&1 | tee make_raw.log
 
 # compiles program with -pg and runs it with gprof
-# uses gprof2dot python script to generate function call tree  
+# uses gprof2dot python script to generate function call tree (pip install gprof2dot)
+# requires graphviz (https://www.graphviz.org/download/source/)
 gprof:
 	@cbuild/call_task.sh gprof 2>&1 | tee make_raw.log
-	
+
+# compiles program and runs it with callgrind (part of valgrind)
+# uses gprof2dot python script to generate function call tree (pip install gprof2dot)
+# requires graphviz (https://www.graphviz.org/download/source/)
+# P.S. detailed results can be viewed in KCacheGrind
+callgrind:
+	@cbuild/call_task.sh callgrind 2>&1 | tee make_raw.log
+
 # compiles executable with sanitizers and executes it to find errors and warnings
 sanitize:
 	@cbuild/call_task.sh sanitize 2>&1 | tee make_raw.log
@@ -59,23 +92,3 @@ fix_log:
 		| sed 's/  H  //g' \
 		| sed 's/\[3gH  //g' \
 		> make_fixed.log
-
-# recompile kerep.a in the next build task
-rebuild_kerep: 
-	@tasks/rebuild_lib.sh kerep
-
-# recompile imgui.a in the next build task
-rebuild_imgui: 
-	@tasks/rebuild_lib.sh imgui
-
-rebuild_imgui-node-editor:
-	@tasks/rebuild_lib.sh imgui-node-editor
-rebuild_imnodes:
-	@tasks/rebuild_lib.sh imnodes
-
-# writes ttf fonts fron ./fonts/ to C compressed arrays in C source files
-# builds static library from font arrays definitions
-embed_fonts:
-	@cbuild/call_task.sh embed_fonts
-
-rebuild_all: rebuild_kerep rebuild_imgui rebuild_imgui-node-editor rebuild_imnodes embed_fonts

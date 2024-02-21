@@ -1,12 +1,12 @@
 #pragma once
 
 #include "gui.h"
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_opengl.h"
-#include "../../imgui/imgui.h"
-#include "../../imgui/backends/imgui_impl_sdl2.h"
-#include "../../imgui/backends/imgui_impl_opengl3.h"
-#include "../../kerep/src/Filesystem/filesystem.h"
+#include "../../dependencies/SDL2/include/SDL.h"
+#include "../../dependencies/SDL2/include/SDL_opengl.h"
+#include "../../dependencies/imgui/imgui.h"
+#include "../../dependencies/imgui/backends/imgui_impl_sdl2.h"
+#include "../../dependencies/imgui/backends/imgui_impl_opengl3.h"
+#include "../../dependencies/kerep/src/Filesystem/filesystem.h"
 
 //////////////////////////////////////
 //              Fonts               //

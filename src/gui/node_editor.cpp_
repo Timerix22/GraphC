@@ -1,5 +1,5 @@
 #include "gui_internal.hpp"
-#include "../../imgui-node-editor/imgui_node_editor.h"
+#include "../../dependencies/imgui_node_editor/imgui_node_editor.h"
 namespace NE = ax::NodeEditor;
 
 NE::EditorContext* editor_context=nullptr;

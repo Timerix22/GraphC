@@ -1,5 +1,5 @@
 #include "gui_internal.hpp"
-#include "../../imnodes/imnodes.h"
+#include "../../dependencies/imnodes/imnodes.h"
 #include <vector>
 #include <algorithm>
 

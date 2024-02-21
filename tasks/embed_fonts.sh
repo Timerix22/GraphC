@@ -1,5 +1,4 @@
 #!/bin/bash
-
 cd fonts
 SRC_C=""
 HEADER="generated/fonts_embedded.h"
@@ -30,17 +29,12 @@ mkdir -p src/generated/
 cp -v fonts/$HEADER src/$HEADER
 myprint "${GREEN}font arrays external definitions have been written to ${CYAN}src/$HEADER"
 
+# delete old objects
 clean_dir "$OBJDIR/objects"
-myprint "${BLUE}hiding libs"
-mv "$OBJDIR/libs" "$OBJDIR/libs_"
-mkdir -p "$OBJDIR/libs"
 # compiling
 compile_c "$C_ARGS" "$SRC_C"
 pack_static_lib "$STATIC_LIB_FILE"
-rm -rf $OUTDIR/fonts_embedded.a
-myprint "${BLUE}restoring libs"
-rm -rf "$OBJDIR/libs"
-mv "$OBJDIR/libs_" "$OBJDIR/libs"
-
-cp "$OBJDIR/out/fonts_embedded.a" libs/
-myprint "$OBJDIR/out/fonts_embedded.a -> libs/"
+# moving lib file
+mv "$OUTDIR/$STATIC_LIB_FILE" libs/
+mkdir -p "libs"
+myprint "$OUTDIR/$STATIC_LIB_FILE -> libs/"

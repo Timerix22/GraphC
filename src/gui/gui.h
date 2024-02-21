@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "../../kerep/src/base/base.h"
+#include "../../dependencies/kerep/src/base/base.h"
 
 Maybe main_window_open(const char* window_title);
 Maybe main_window_loop_start();
