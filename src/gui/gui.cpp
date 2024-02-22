@@ -1,17 +1,10 @@
-#include "gui_internal.hpp"
-#include "NodeEditor.hpp"
-using namespace GraphC::gui;
+#include "gui.hpp"
+#include "../../dependencies/imgui/backends/imgui_impl_sdl2.h"
+#include "../../dependencies/imgui/backends/imgui_impl_opengl3.h"
 
-#define default_font_name font_DroidSans
-const f32 default_font_size=14.0f;
-ImVec4 clear_color = RGBAHexToF(35,35,50,255);
-bool loop_running=false;
-SDL_Window* sdl_window;
-SDL_GLContext gl_context;
-bool main_loop_wait_for_input=true;
-NodeEditor node_editor("new editor");
+namespace GraphC::gui {
 
-f32 getMainWindowDPI(){
+f32 GUI::getDPI(){
     int w=0, h=0;
     SDL_GL_GetDrawableSize(sdl_window, &w, &h);
     int sim_w=0, sim_h=0;
@@ -22,7 +15,7 @@ f32 getMainWindowDPI(){
     return dpi;
 }
 
-Maybe main_window_open(const char* window_title){
+void GUI::init(const char* window_title){
     SDL_TRY_ZERO(SDL_Init(SDL_INIT_VIDEO));
     SDL_version v;
     SDL_GetVersion(&v);
@@ -69,53 +62,53 @@ Maybe main_window_open(const char* window_title){
 
     // Setup Platform/Renderer backends
     if(ImGui_ImplSDL2_InitForOpenGL(sdl_window, gl_context) != true)
-        SDL_ERROR_SAFETHROW();
+        throw SDLException();
     if(ImGui_ImplOpenGL3_Init(glsl_version) != true)
-        SDL_ERROR_SAFETHROW();
+        throw SDLException();
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    io.FontDefault=ImFont_LoadEmbedded(default_font_name, default_font_size);
-    ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size);
+    f32 dpi = getDPI();
+    io.FontDefault=fonts:: ImFont_LoadEmbedded(default_font, default_font_size, dpi);
+    fonts:: ImFont_LoadEmbedded(font_Cousine_Regular, default_font_size, dpi);
 
     ImNodes::CreateContext();
     ImNodes::StyleColorsDark();
     ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
     node_editor=NodeEditor("node editor");
-    return MaybeNull;
+    node_editor.show();
 }
 
 // Wait, poll and handle events (inputs, window resize, etc.)
-Maybe poll_events(u16& frame_updates_requested, bool wait){
+void GUI::poll_events(u16& frame_updates_requested, bool wait){
     SDL_Event event;
     if(wait){
         // waits for first event in cpu-efficient way
         SDL_TRY_ONE(SDL_WaitEvent(&event)); 
     }
-    // doesnt wait for event
+    // dont wait for event
     else if(!SDL_PollEvent(&event))
-        return MaybeNull;
+        return;
     
     do {
         if(ImGui_ImplSDL2_ProcessEvent(&event))
             frame_updates_requested=2;
         switch(event.type){
             case SDL_QUIT: {
-                try_cpp(main_window_close(),_9914,;);
+                close();
                 break;
             }
             case SDL_WINDOWEVENT: {
                 if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(sdl_window)){
-                    try_cpp(main_window_close(),_9915,;);
+                    close();
                 }
                 break;
             }
         }
     } while (SDL_PollEvent(&event)); // if there are more events, handles them
-    return MaybeNull;
 }
 
-Maybe draw_frame(){
+void GUI::draw_frame(){
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -125,7 +118,6 @@ Maybe draw_frame(){
     // Draw UI
     draw_bg_window();
     draw_debug_window(io, &main_loop_wait_for_input);
-    node_editor.show();
     node_editor.draw();
 
     // Rendering
@@ -149,15 +141,14 @@ Maybe draw_frame(){
 
     SDL_GL_SwapWindow(sdl_window);
 
-    return MaybeNull;
 }
 
-Maybe main_window_loop_start(){
+void GUI::startAndWait(){
     if(loop_running)
-        safethrow_msg("loop is already running",;);
+        throw UsefulException("loop is already running");
 
     // draw first frame
-    try_cpp(draw_frame(),_2175,;);
+    draw_frame();
 
     u16 frame_updates_requested=1;
     u64 prev_update_time_ms=SDL_GetTicks64();
@@ -165,20 +156,20 @@ Maybe main_window_loop_start(){
     // main loop
     while(loop_running){
         // waits for events
-        try_cpp(poll_events(frame_updates_requested, main_loop_wait_for_input),_55415,;);
+        poll_events(frame_updates_requested, main_loop_wait_for_input);
 
         if(frame_updates_requested==0)
         {
             u64 update_time_ms=SDL_GetTicks64();
-            if(update_time_ms >= prev_update_time_ms + 1000/frame_rate_min){
-                // if frame rate < frame_rate_min then requests frame draw
+            if(update_time_ms >= prev_update_time_ms + 1000/fps_min){
+                // if frame rate < fps_min then requests frame draw
                 // works only if main_loop_wait_for_input = false
                 frame_updates_requested=1;
                 prev_update_time_ms=update_time_ms;
             }
             else {
                 // skips frame rendering and waits to limit fps
-                u32 frame_delay_ms=1000/frame_rate_max;
+                u32 frame_delay_ms=1000/fps_max;
                 SDL_Delay(frame_delay_ms);
                 continue;
             }
@@ -186,24 +177,20 @@ Maybe main_window_loop_start(){
 
         // deaws requested number of frames
         while(frame_updates_requested>0) {
-            try_cpp(draw_frame(),_2175,;);
+            draw_frame();
             frame_updates_requested--;
         }   
     }
 
     // Cleanup
-    main_window_destroy();
-    return MaybeNull;
+    GUI::destroy();
 }
 
-Maybe main_window_close(){
-    if(!loop_running)
-        return MaybeNull;
+void GUI::close(){
     loop_running=false;
-    return MaybeNull;
 }
 
-void main_window_destroy(){
+void GUI::destroy(){
     ImNodes::DestroyContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -211,4 +198,57 @@ void main_window_destroy(){
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
+}
+
+void GUI::draw_bg_window(){
+    const ImGuiDockNodeFlags dockspace_flags =
+            ImGuiDockNodeFlags_PassthruCentralNode;
+    const ImGuiWindowFlags window_flags =
+        ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoFocusOnAppearing |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoBackground;
+    // not dockable window that always bound to viewport
+    ImGuiViewport* viewport = ImGui::GetWindowViewport();
+    ImGui::SetNextWindowPos(viewport->Pos, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Always);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("bg_window", nullptr, window_flags);
+    ImGui::PopStyleVar(3);
+
+    // DockSpace
+    ImGuiID dockspace_id = ImGui::GetID("bg_dockspace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    
+    // MenuBar
+    //TODO
+
+    ImGui::End();
+}
+
+void GUI::draw_debug_window(ImGuiIO& io, bool* main_loop_wait_for_input){
+    ImGui::Begin("Debug Options");
+    ImGui::ColorEdit3("clear_color", (float*)&clear_color);
+    ImGui::Checkbox("main_loop_wait_for_input", main_loop_wait_for_input);
+    ImGui::Text("Application average %.3f ms/frame (%.2f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Checkbox("Demo Window", &show_demo_window);
+    ImGui::Checkbox("Metrics/Debug Window", &show_metrics_window);
+    ImGui::End();
+
+    if (show_demo_window)
+        ImGui::ShowDemoWindow(&show_demo_window);
+
+    if (show_metrics_window)
+        ImGui::ShowMetricsWindow(&show_metrics_window);
+}
+
 }

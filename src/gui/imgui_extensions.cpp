@@ -1,8 +1,8 @@
-#include "gui_internal.hpp"
+#include "gui.hpp"
 
 namespace ImGui {
 
-void SetWindowSizeMin(f32 window_width_min, f32 window_height_min){
+void SetWindowSizeMin(float window_width_min, float window_height_min){
     ImVec2 window_size=ImGui::GetWindowSize();
     ImVec2 new_size=window_size;
     bool changed=false;
@@ -18,11 +18,10 @@ void SetWindowSizeMin(f32 window_width_min, f32 window_height_min){
         ImGui::SetWindowSize(new_size);
 }
 
-} // namespace
-
-
 ImVec2 ImVec2Add(ImVec2 a, ImVec2 b) {
     a.x+=b.x;
     a.y+=b.y;
     return a;
+}
+
 }

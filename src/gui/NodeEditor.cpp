@@ -1,4 +1,4 @@
-#include "gui_internal.hpp"
+#include "gui.hpp"
 #include <algorithm>
 #include "NodeEditor.hpp"
 
@@ -92,7 +92,6 @@ void NodeEditor::draw(){
         id_t out_attr_id;
         if (ImNodes::IsLinkCreated(&in_attr_id, &out_attr_id))
         {
-            kprintf("new link id: %i\n", next_id);
             NodeAttributeLink link(next_id++, in_attr_id, out_attr_id);
             links.push_back(link);
         }
@@ -101,15 +100,12 @@ void NodeEditor::draw(){
         id_t link_id;
         if (ImNodes::IsLinkDestroyed(&link_id))
         {
-            kprintf("link destroyed %i\n", link_id);
             auto iter = std::find_if(links.begin(), links.end(), 
                 [link_id](const NodeAttributeLink& link) -> bool {
-                    kprintf("destroyed link found\n");
                     return link.id == link_id;
                 });
             assert(iter != links.end());
             links.erase(iter);
-            kprintf("destroyed link erased\n");
         }
 
     ImGui::End();
