@@ -9,12 +9,14 @@ fi
 
 set -x
 # copy precompiled static libs to objects
-cp libs/*.a "$OBJDIR/libs/"
+static_libs=$(find "libs/" -name '*.a')
+[[ -n "$static_libs" ]] && cp $static_libs "$OBJDIR/libs/"
 
 # copy precompiled shared libs to outdir
-if [ $OS == 'WINDOWS' ]; then
-    cp libs/*.dll "$OUTDIR"
+if [ "$OS" == 'WINDOWS' ]; then
+    dynamic_libs=$(find "libs/" -name '*.dll')
 else
-    cp libs/*.so "$OUTDIR"
+    dynamic_libs=$(find "libs/" -name '*.so')
 fi
+[[ -n "$dynamic_libs" ]] && cp $dynamic_libs "$OUTDIR/"
 set +x

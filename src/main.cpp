@@ -1,7 +1,7 @@
 #include "gui/gui.hpp"
 #include <iostream>
 
-// SDL for some reason redefains main
+// SDL for some reason redefines main
 #ifdef main 
     #undef main
 #endif
