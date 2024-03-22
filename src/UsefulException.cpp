@@ -12,7 +12,7 @@ UsefulException_::UsefulException_(std::string _message, std::string _file, std:
     complete_text = ss.str();
 }
 
-const char* UsefulException_::what() {
+char const* UsefulException_::what() const noexcept {
     return complete_text.c_str();
 }
 

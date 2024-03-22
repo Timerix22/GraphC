@@ -17,7 +17,7 @@ class UsefulException_ : public std::exception {
 public:
     UsefulException_(std::string msg, std::string _file, std::string _func, int line_n);
 
-    const char* what();
+    virtual char const* what() const noexcept;
 };
 
 }
